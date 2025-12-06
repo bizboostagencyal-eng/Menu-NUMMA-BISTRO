@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Numma Bistro — Menu Digjitale</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --muted:#7a7f88;
+    --accent-kafe:#c23131;
+    --accent-fres:#2f3640;
+    --accent-birra:#d8b400;
+    --glass: rgba(255,255,255,0.6);
+    --radius:12px;
+    font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#eef1f4 0%,#f9fafb 100%);color:#222;-webkit-font-smoothing:antialiased;}
+  header{display:flex;align-items:center;gap:18px;padding:20px 28px;background:var(--card);box-shadow:0 6px 18px rgba(20,30,50,0.06);position:sticky;top:0;z-index:10;}
+  .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#111 0%, #444 100%);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+  h1{font-size:20px;margin:0}
+  .sub{color:var(--muted);font-size:13px}
+  .controls{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .search{background:var(--glass);border-radius:999px;padding:8px 12px;display:flex;gap:8px;align-items:center;border:1px solid rgba(0,0,0,0.04);}
+  .search input{border:none;background:transparent;outline:none;width:220px;font-size:14px;color:#222}
+  main{display:flex;gap:24px;padding:22px;max-width:1200px;margin:18px auto;}
+  nav.categories{width:220px;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(16,24,40,0.04);height:calc(100vh - 160px);position:sticky;top:90px;overflow:auto;}
+  .cat-btn{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;margin-bottom:10px;cursor:pointer;border:1px solid transparent}
+  .cat-btn .dot{width:12px;height:12px;border-radius:50%}
+  .cat-btn:hover{background:rgba(0,0,0,0.02)}
+  .cat-btn.active{border-color:rgba(0,0,0,0.06);box-shadow:0 2px 6px rgba(0,0,0,0.03)}
+  .count{margin-left:auto;color:var(--muted);font-size:13px}
+  section.menu-area{flex:1;background:transparent}
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  .item{background:var(--card);padding:14px;border-radius:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 20px rgba(16,24,40,0.04);border:1px solid rgba(0,0,0,0.03);}
+  .item h3{margin:0;font-size:16px}
+  .price{font-weight:700;color:#111}
+  .meta{display:flex;justify-content:space-between;align-items:center}
+  .tag{font-size:12px;color:var(--muted);padding:6px 8px;border-radius:999px;border:1px dashed rgba(0,0,0,0.04)}
+  .add{background:linear-gradient(90deg,#111, #333);color:white;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+  .badge{font-size:12px;opacity:0.9;padding:6px 8px;border-radius:10px}
+  .kafe .badge{background:var(--accent-kafe);color:white}
+  .fres .badge{background:var(--accent-fres);color:white}
+  .birra .badge{background:var(--accent-birra);color:#222}
+  .cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .cat-title{display:flex;gap:12px;align-items:center}
+  .cat-title .emoji{font-size:28px}
+  .grid-row{margin-bottom:16px}
+  @media (max-width:900px){
+    main{padding:16px;flex-direction:column}
+    nav.categories{width:100%;height:auto;position:relative;top:0;display:flex;overflow:auto}
+    .cat-btn{flex:0 0 auto}
+  }
+  footer{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NUMMA</div>
+  <div>
+    <h1>Numma Bistro</h1>
+    <div class="sub">Menu Digjitale — Zgjedh kategorie ose kërko</div>
+  </div>
+  <div class="controls">
+    <div class="search" title="Kërko artikull">
+      🔍 <input id="q" placeholder="Kërko... (p.sh. kafe, cola, corona)" />
+    </div>
+  </div>
+</header>
+<main>
+  <nav class="categories" id="cats"></nav>
+  <section class="menu-area">
+    <div class="cat-header">
+      <div class="cat-title">
+        <div class="emoji" id="catEmoji">☕</div>
+        <div>
+          <div id="catName" style="font-weight:700;font-size:18px">KAFE</div>
+          <div class="sub" id="catDesc">Pije të ngrohta dhe çajra</div>
+        </div>
+      </div>
+      <div id="catCount" class="sub">-- artikuj</div>
+    </div>
+    <div class="menu-grid" id="menu"></div>
+  </section>
+</main>
+<footer>Numma Bistro — Menu Digjitale • Përmirëso dizajnin ose shto fotografi për çdo artikull.</footer>
+<script>
+const data=[
+  {cat:'KAFE',name:'Caj Bio Boronice',price:190},{cat:'KAFE',name:'Caj Bio Molle Kanelle',price:190},{cat:'KAFE',name:'Caj Bio Taylors of H',price:190},{cat:'KAFE',name:'Caj Kamomil Bio',price:190},{cat:'KAFE',name:'Caj Mali Bio',price:190},{cat:'KAFE',name:'Caj Sherebele Bio',price:190},{cat:'KAFE',name:'Çokollatë e Ngrohtë',price:180},{cat:'KAFE',name:'Decaffeinato',price:120},{cat:'KAFE',name:'Dekafeinato Staf',price:0},{cat:'KAFE',name:'Kafe',price:90},{cat:'KAFE',name:'Kafe Latte',price:150},{cat:'KAFE',name:'Kafe Staff',price:0},{cat:'KAFE',name:'Kakao',price:160},{cat:'KAFE',name:'Kakao e Vogel',price:80},{cat:'KAFE',name:'Kapuçino Bustine',price:150},{cat:'KAFE',name:'Kapuçino Kafe',price:180},{cat:'KAFE',name:'Korreto',price:130},{cat:'KAFE',name:'Makiato',price:90},{cat:'KAFE',name:'Makiato e Gjatë',price:150},{cat:'KAFE',name:'Mjalt',price:40},{cat:'KAFE',name:'Qumësht Gote',price:150},{cat:'KAFE',name:'Salep',price:150},{cat:'KAFE',name:'Yellow Fit Tea Organic',price:200},
+  {cat:'FRESKUESE',name:'B52',price:250},{cat:'FRESKUESE',name:'Biter',price:150},{cat:'FRESKUESE',name:'Bravo',price:190},{cat:'FRESKUESE',name:'Cola Zero 033',price:190},{cat:'FRESKUESE',name:'Cola Kanace 033L',price:190},{cat:'FRESKUESE',name:'Crodino',price:190},{cat:'FRESKUESE',name:'Fanta',price:190},{cat:'FRESKUESE',name:'Fiji Water',price:380},{cat:'FRESKUESE',name:'Franklin Tonic',price:400},{cat:'FRESKUESE',name:'Fever Tree',price:400},{cat:'FRESKUESE',name:'Ice Tea Bio',price:160},{cat:'FRESKUESE',name:'Lemon Soda 033L',price:190},{cat:'FRESKUESE',name:'Lipton Ice Tea 033L',price:190},{cat:'FRESKUESE',name:'Nescafe Kanace',price:280},{cat:'FRESKUESE',name:'Orange Soda 033L',price:190},{cat:'FRESKUESE',name:'Red Bull',price:350},{cat:'FRESKUESE',name:'Rose Lemonade',price:480},{cat:'FRESKUESE',name:'Schweppes 015L',price:180},{cat:'FRESKUESE',name:'Smoothie',price:280},{cat:'FRESKUESE',name:'Smoothie Passion Fruit',price:400},{cat:'FRESKUESE',name:'Sprite 033L',price:190},{cat:'FRESKUESE',name:'Starbucks Frappuccino',price:500},{cat:'FRESKUESE',name:'Uje i Madh 075L',price:240},{cat:'FRESKUESE',name:'Uje me Gaz',price:90},{cat:'FRESKUESE',name:'Uje me Vitamina',price:180},{cat:'FRESKUESE',name:'Uje Natyral 05L',price:90},
+  {cat:'BIRRA',name:'Corona',price:380},{cat:'BIRRA',name:'Heineken',price:350},{cat:'BIRRA',name:'Heineken 0% Alc',price:380},{cat:'BIRRA',name:'Hofbrau 05 Wisse',price:550},{cat:'BIRRA',name:'Hofbrau 03 Wisse',price:380},{cat:'BIRRA',name:'Hofbrau 033',price:460},{cat:'BIRRA',name:'Hofbrau 04 Wisse',price:440},{cat:'BIRRA',name:'Hofbrau 05 Wisse (var)',price:540},{cat:'BIRRA',name:'Hofbrau 1L',price:1050},{cat:'BIRRA',name:'Hofbrau Kriko 03',price:380},{cat:'BIRRA',name:'Hofbrau Kriko 05L',price:540},{cat:'BIRRA',name:'Hofbrau Kriko 1L',price:1050},{cat:'BIRRA',name:'Hofbrau 04L Original',price:440}
+];
+
+const categories=[
+  {id:'KAFE',title:'KAFE',emoji:'☕',cls:'kafe',desc:'Pije të ngrohta, kafe & çajra'},
+  {id:'FRESKUESE',title:'FRESKUESE',emoji:'🥤',cls:'fres',desc:'Pije freskuese dhe ujëra'},
+  {id:'BIRRA',title:'BIRRA',emoji:'🍺',cls:'birra',desc:'Birra të ndryshme'}
+];
+
+const catsEl=document.getElementById('cats');
+const menuEl=document.getElementById('menu');
+const catName=document.getElementById('catName');
+const catDesc=document.getElementById('catDesc');
+const catEmoji=document.getElementById('catEmoji');
+const catCount=document.getElementById('catCount');
+const qInput=document.getElementById('q');
+let activeCat='KAFE';
+
+function renderCats(){
+  catsEl.innerHTML='';
+  for(const c of categories){
+    const count=data.filter(x=>x.cat===c.id).length;
+    const btn=document.createElement('div');
+    btn.className='cat-btn'+(c.id===activeCat?' active':'');
+    btn.dataset.cat=c.id;
+    btn.innerHTML=`<div class="dot" style="background:${c.id==='KAFE'?getComputedStyle(document.documentElement).getPropertyValue('--accent-kafe'):(c.id==='FRESKUESE'?getComputedStyle(document.documentElement).getPropertyValue('--accent-fres'):getComputedStyle(document.documentElement).getPropertyValue('--accent-birra'))}"></div>
+      <div><div style="font-weight:600">${c.title}</div><div style="font-size:12px;color:var(--muted)">${c.desc}</div></div>
+      <div class="count">${count}</div>`;
+    btn.addEventListener('click',()=>{activeCat=c.id;update();renderCats();});
+    catsEl.appendChild(btn);
+  }
+}
+
+function renderMenu(filterText=''){
+  menuEl.innerHTML='';
+  let list=data.filter(x=>x.cat===activeCat);
+  const q=filterText.trim().toLowerCase();
+  if(q){list=list.filter(it=>it.name.toLowerCase().includes(q)||String(it.price).includes(q));}
+  catCount.textContent=`${list.length} artikuj`;
+  for(const it of list){
+    const card=document.createElement('div');
+    card.className='item '+(activeCat==='KAFE'?'kafe':activeCat==='FRESKUESE'?'fres':'birra');
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02));display:flex;align-items:center;justify-content:center;font-weight:700;color:rgba(0,0,0,0.6)">
+          ${it.name.split(' ').slice(0,2).map(w=>w[0]||'').join('')}
+        </div>
+        <div style="flex:1">
+          <h3>${it.name}</h3>
+          <div class="sub" style="margin-top:4px">Shiko detajet</div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="tag">${it.cat}</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="price">${it.price} Lek</div>
+          <button class="add" onclick="addToOrder('${escapeHtml(it.name)}',${it.price})">Shto</button>
+        </div>
+      </div>
+    `;
+    menuEl.appendChild(card);
+  }
+  if(list.length===0){menuEl.innerHTML=`<div style="padding:26px;background:var(--card);border-radius:12px;color:var(--muted)">Nuk u gjet asnjë artikull.</div>`;}
+}
+
+function update(){
+  const cfg=categories.find(c=>c.id===activeCat);
+  catName.textContent=cfg.title;
+  catDesc.textContent=cfg.desc;
+  catEmoji.textContent=cfg.emoji;
+  renderMenu(qInput.value);
+}
+
+function addToOrder(name,price){alert(name+" u shtua në porosi — "+price+" Lek");}
+function escapeHtml(s){return s.replaceAll("'","\'").replaceAll('"','\"');}
+qInput.addEventListener('input',()=>{renderMenu(qInput.value);});
+renderCats();update();
+</script>
+</body>
+</html>
